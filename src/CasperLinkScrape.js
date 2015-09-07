@@ -14,7 +14,7 @@ function getProfileLinks() {
     });
 }
 
-casper.start('https://www.lendwithcare.org/search/funded/completed/', function() {
+casper.start('https://www.lendwithcare.org/search/completed/funded', function() {
 
 });
 
@@ -22,7 +22,7 @@ casper.then(function(){
     //store css selector for  button that loads more content
     var buttonCss = '#card_container > div.paginate-more > button';
 
-    for(var i=0; i<4; i++) {
+    for(var i=0; i<1; i++) {
 
         // when button appears echo
         casper.waitForSelector(buttonCss,
@@ -34,7 +34,7 @@ casper.then(function(){
 
             function onTimeout(){this.echo('timed out before button element loaded in DOM')}, 15000
         );
-    }
+    }this.capture('goog');
 });
 
 casper.then(function() {
@@ -44,6 +44,7 @@ casper.then(function() {
 
     // write all links to JSON file
     fs.write('linksData.json', JSON.stringify(links), 'w');
+
 
 });
 
