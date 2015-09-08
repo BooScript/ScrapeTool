@@ -1,64 +1,56 @@
 /**
  * Created by Tom on 07/09/2015.
- */
-// scrapes a given profile
+ */// scrapes a given profile
+
+
+//expose function for profile scrape
 module.exports.profileScrape = profileScrape;
 
-var request = require("request"),
+//expose arrays to hold scraped profile data
+    //expose array that stores body of dom
+module.exports.profileDataRaw =  profileDataRaw;
+    //expose array that stores selected elements of dom
+module.exports.profileDataSelected = profileDataSelected;
 
-    cheerio = require("cheerio");
+//import modules
+var fs = require('fs');
+var request = require("request");
+//    cheerio = require("cheerio");
 
-function profileScrape(queryUrl) {
+//array to store dump of entire body from DOM for profiles
+var profileDataRaw = [];
+// array to store explicit elements mentioned in profilescrape function
+var profileDataSelected = [];
+
+function profileScrape(queryUrl, lastScrape) {
+
 
 // function that takes an array of project urls to query and returns object of all projects attributes
-//function getKeyAttributes(queryUrlArr){}
+
     request(queryUrl, function (error, response, body) {
         if (!error) {
-            var $ = cheerio.load(body);
 
-            //initialise empty array to store key project attributes
-            var keyAttributes = [];
-            $('h1').each(function () {
-                keyAttributes.push(this.children[0].data);
+            // write file shouldnt be there
+            //it is only used to provide the callback function as i didnt know how else to implement it
+            fs.writeFile('gg.txt', 'h', function(){
+            console.log('called');
+                profileDataRaw.push(body);
+             //   profileDataSelected.push(keyAttributes);
+                if(lastScrape) {
+                    console.log(profileDataRaw);
+
+                    fs.writeFile('ggp.txt', profileDataRaw, function () {
+                        console.log('file written!!!!!!!!');
+                    });
+                }
             });
-            $('label').each(function () {
-                keyAttributes.push(this.children[0].data);
-            });
+                return true;
 
-
-            $('p').each(function () {
-                keyAttributes.push(this.children[0].data);
-            });
-
-            $('span.time').each(function () {
-                keyAttributes.push(this.children[0].data);
-            });
-            $('div.gm-style').each(function () {
-                keyAttributes.push(this.children.data);
-            });
-
-            // loop for each h3 element on page and push key attributes to array
-            $('h3').each(function () {
-                keyAttributes.push(this.children[0].data);
-            });
-
-            $('.span').each(function () {
-                keyAttributes.push(this.children[0].data);
-            });
-
-            $('td').each(function () {
-                keyAttributes.push(this.children[0].data);
-            });
-
-
-
-            console.log(keyAttributes);
         }
         if (error) {
             console.log('http request failed to give response');
         }
 
-        return keyAttributes;
     });
 
 }
