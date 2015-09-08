@@ -24,7 +24,7 @@ function splitRawtoJSON() {
     projectRawArr = fileContent.split(/<!DOCTYPE html>/g);
     console.log(projectRawArr);
     //write to json file
-    fs.writeFile('individualProjectsRaw.json', JSON.stringify(projectRawArr,'', '/n splitH'), function (err) {
+    fs.writeFile('individualProjectsRaw.json', JSON.stringify(projectRawArr,''), function (err) {
         if (err) throw err;
     });
 }
