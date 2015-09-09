@@ -7,25 +7,24 @@ require('./ProjectClass.js');
 var scrape = require('./profileScrape.js');
 var request = require("request");
 
-// import function to scrape profile
-var GetProfileLinks = require('./GetProfileLinks_FromDump.js');
-// all profile urls consist of this url
-var baseURL = 'https://www.lendwithcare.org/';
-// get array of funded project profile links
-var linksArr = GetProfileLinks.getProfileLinks;
-var t = [];
-// initialise writable stream
-
 function writeToFile(data) {
     fs.writeFile('rawProfileContent2.txt', data, function () {
         console.log('file written!!!!!!!!');
     })
 }
+// import function to scrape profile
+var GetProfileLinks = require('./GetProfileLinks_FromDump.js');
+// all profile urls consist of this url
+var baseURL = 'https://www.lendwithcare.org/';
+// calls function from getlinksfromdump module that parses JSON object and returns array of profile links
+var linksArr = GetProfileLinks.getProfileLinks;
+// t termporarily stoes data for each scrape to dump to file
+var t = [];
+
 //count responses received
 var responseCount = 0;
 //scrape profiles
 for (var i = 0; i < 40; i++) {
-
     //concatenate base url with profile link url to give request url
     var urlCur = baseURL + linksArr[i];
 
@@ -37,7 +36,6 @@ for (var i = 0; i < 40; i++) {
           // all responses have been received
             if(responseCount === 39){writeToFile(t)}
         });
-
 }
 
 
