@@ -1,11 +1,7 @@
 //
 //reads raw json file and parses project attributes and writes these attributes to project class object
-// import module that gives us project class
-//require('./ProjectClass.js');
-//module.exports.Match_Project_Strings = MatchProjectStrings();
 
 var fs = require('fs');
-
 
 function writeToJSONFile(data) {
     fs.writeFile('FinalJSON.json', JSON.stringify(data), function () {
@@ -20,19 +16,19 @@ var rawProjects = JSON.parse(fs.readFileSync(
             throw err;
         }
        // console.log(projectAttr);
-    }));
+    }
+));
 
+//object of patterns to match project attributes
 var regexPatterns = {
     title: /(?:!?h1\>)(.+)(?:!?\<\/h1\>)/ ,
     value: /(?:!?&pound;)(.+)(?:!?\<)/ ,
     location: /(?:!?span>)(.+)(?=<)/ ,
     latLng: /(?:!?LatLng\()(.+)(?=\d)/ ,
-dateLoanAdded: /(?:!?loan added:\s)(.+)(?:!?\<\/span)/ ,
-repaymentTermMonths: /(?:!?\>)(.+)(?:!?Months\<\/h)/ ,
-//still need to get pattern to match activity type
+    dateLoanAdded: /(?:!?loan added:\s)(.+)(?:!?\<\/span)/ ,
+    repaymentTermMonths: /(?:!?\>)(.+)(?:!?Months\<\/h)/ ,
     activityType: /(?:!?Activity type:<\/p>\n.+<h3\sclass="grey">)(.+)(?:!?<\/h3)/m ,
-MFIpartner: /(?:!?MFI partner:<\/p>\n.+<h3\sclass="grey">)(.+)(?:!?<\/h3)/m
-
+    MFIpartner: /(?:!?MFI partner:<\/p>\n.+<h3\sclass="grey">)(.+)(?:!?<\/h3)/m
 };
 
 //initialise empty array to store project objects
@@ -51,7 +47,6 @@ function getMatches(string, regex, index){
 for(var i=1; i< rawProjects.length; i++){
     //initialise project object
     var projectAttr = new Object();
-
      projectAttr.title = rawProjects[i].match(regexPatterns.title);
      projectAttr.title = getMatches(rawProjects[i], regexPatterns.title);
     projectAttr.value = getMatches(rawProjects[i], regexPatterns.value);
@@ -59,21 +54,9 @@ for(var i=1; i< rawProjects.length; i++){
      projectAttr.latLng = getMatches(rawProjects[i], regexPatterns.latLng);
      projectAttr.dateLoanAdded = getMatches(rawProjects[i], regexPatterns.dateLoanAdded);
      projectAttr.repaymentTermMonths = getMatches(rawProjects[i], regexPatterns.repaymentTermMonths);
-    //use
     projectAttr.mfiPartner = getMatches(rawProjects[i], regexPatterns.MFIpartner);
     projectAttr.activityType = getMatches(rawProjects[i], regexPatterns.activityType);
     projects.push((projectAttr));
-console.log(projectAttr)
-
 }
 console.log(projects);
-
 writeToJSONFile(projects);
-//projects.forEach(function (proj) {
-   // console.log(proj.dateLoanAdded.keys());
-//for (var prop in proj.dateLoanAdded){
-  //  console.log(prop)
-
-//}
-
-//});
