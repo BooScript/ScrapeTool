@@ -6,6 +6,9 @@
 //import module
 var fs = require('fs');
 
+//export function that separates data dump into individual projects
+module.exports.separateDumpToProjs = separateDumptoProjs;
+
 var fileContent;
 function readfile(callback){
     fs.readFile('rawProfileContent2.txt','utf-8', function(err, data){
@@ -30,4 +33,9 @@ function splitRawtoJSON() {
 }
 //read file then pass in parsing function to callback after file is read
 // then write array to JSON
-readfile(splitRawtoJSON);
+function separateDumptoProjs(){
+
+    return readfile(splitRawtoJSON);
+}
+
+separateDumptoProjs();
