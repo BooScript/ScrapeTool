@@ -8,7 +8,7 @@ var fs = require('fs');
 
 
 function writeToJSONFile(data) {
-    fs.writeFile('FinalJSON.txt', JSON.stringify(data), function () {
+    fs.writeFile('FinalJSON.json', JSON.stringify(data), function () {
         console.log('file written!!!!!!!!');
     })
 }
