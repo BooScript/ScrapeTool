@@ -1,7 +1,7 @@
 //
 //reads raw json file and parses project attributes and writes these attributes to project class object
 // import module that gives us project class
-require('./ProjectClass.js');
+//require('./ProjectClass.js');
 //module.exports.Match_Project_Strings = MatchProjectStrings();
 
 var fs = require('fs');
@@ -30,7 +30,8 @@ var regexPatterns = {
 dateLoanAdded: /(?:!?loan added:\s)(.+)(?:!?\<\/span)/ ,
 repaymentTermMonths: /(?:!?\>)(.+)(?:!?Months\<\/h)/ ,
 //still need to get pattern to match activity type
-MFIpartner: /(?:!?h3\sclass="grey">)([A-Za-z]+)(?:!?<\/h3)/
+    activityType: /(?:!?Activity type:<\/p>\n.+<h3\sclass="grey">)(.+)(?:!?<\/h3)/m ,
+MFIpartner: /(?:!?MFI partner:<\/p>\n.+<h3\sclass="grey">)(.+)(?:!?<\/h3)/m
 
 };
 
@@ -43,7 +44,7 @@ function getMatches(string, regex, index){
     index || (index = 1); //default to first capturing group
     var matches = [];
     var match = (regex.exec(string));
-    if(match) return match[1];
+    if(match) return match[index];
 }
 
 //loop through each projectdatadump and get attributes
@@ -58,8 +59,9 @@ for(var i=1; i< rawProjects.length; i++){
      projectAttr.latLng = getMatches(rawProjects[i], regexPatterns.latLng);
      projectAttr.dateLoanAdded = getMatches(rawProjects[i], regexPatterns.dateLoanAdded);
      projectAttr.repaymentTermMonths = getMatches(rawProjects[i], regexPatterns.repaymentTermMonths);
-    //need to give string for match
+    //use
     projectAttr.mfiPartner = getMatches(rawProjects[i], regexPatterns.MFIpartner);
+    projectAttr.activityType = getMatches(rawProjects[i], regexPatterns.activityType);
     projects.push((projectAttr));
 console.log(projectAttr)
 
