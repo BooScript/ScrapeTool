@@ -25,17 +25,16 @@ function readfile(callback){
 function splitRawtoJSON() {
     //split text by project
     projectRawArr = fileContent.split(/<!DOCTYPE html>/g);
-    console.log(projectRawArr);
+//    console.log(projectRawArr);
     //write to json file
     fs.writeFile('individualProjectsRaw.json', JSON.stringify(projectRawArr,''), function (err) {
+        console.log('separated file written');
         if (err) throw err;
     });
 }
 //read file then pass in parsing function to callback after file is read
 // then write array to JSON
 function separateDumptoProjs(){
-
+        console.log('now splitting dump to individual projs');
     return readfile(splitRawtoJSON);
 }
-
-separateDumptoProjs();
