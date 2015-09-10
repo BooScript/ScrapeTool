@@ -37,26 +37,41 @@ MFIpartner: /(?:!?h3\sclass="grey">)([A-Za-z]+)(?:!?<\/h3)/
 //initialise empty array to store project objects
 var projects = [];
 
+//function to capture only nth group of match for regex
+function getMatches(string, regex, index){
+    if(!regex) return 'NoRegexGivenForSearch';
+    index || (index = 1); //default to first capturing group
+    var matches = [];
+    var match = (regex.exec(string));
+    if(match) return match[1];
+}
 
 //loop through each projectdatadump and get attributes
-for(var i=0; i< rawProjects.length; i++){
+for(var i=1; i< rawProjects.length; i++){
     //initialise project object
-    var projectAttr = new Object()
+    var projectAttr = new Object();
 
-    // projectAttr.title = rawProjects[i].match(regexPatterns.title);
-    //push regex matches to object
-    projectAttr.title = rawProjects[i].match(regexPatterns.title);
-    projectAttr.value = rawProjects[i].match(regexPatterns.value);
-    projectAttr.location = rawProjects[i].match(regexPatterns.location);
-    projectAttr.latLng = rawProjects[i].match(regexPatterns.latLng);
-    projectAttr.dateLoanAdded = rawProjects[i].match(regexPatterns.dateLoanAdded);
-    projectAttr.repaymentTermMonths = rawProjects[i].match(regexPatterns.repaymentTermMonths);
-    projectAttr.mfiPartner = rawProjects[i].match(regexPatterns.MFIpartner);
+     projectAttr.title = rawProjects[i].match(regexPatterns.title);
+     projectAttr.title = getMatches(rawProjects[i], regexPatterns.title);
+    projectAttr.value = getMatches(rawProjects[i], regexPatterns.value);
+    projectAttr.location = getMatches(rawProjects[i], regexPatterns.location);
+     projectAttr.latLng = getMatches(rawProjects[i], regexPatterns.latLng);
+     projectAttr.dateLoanAdded = getMatches(rawProjects[i], regexPatterns.dateLoanAdded);
+     projectAttr.repaymentTermMonths = getMatches(rawProjects[i], regexPatterns.repaymentTermMonths);
+    //need to give string for match
+    projectAttr.mfiPartner = getMatches(rawProjects[i], regexPatterns.MFIpartner);
     projects.push((projectAttr));
+console.log(projectAttr)
+
 }
 console.log(projects);
 
 writeToJSONFile(projects);
-projects.forEach(function (proj) {
-    console.log(proj.dateLoanAdded);
-});
+//projects.forEach(function (proj) {
+   // console.log(proj.dateLoanAdded.keys());
+//for (var prop in proj.dateLoanAdded){
+  //  console.log(prop)
+
+//}
+
+//});
