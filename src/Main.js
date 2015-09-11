@@ -65,7 +65,7 @@ async.series([
                 callback(null, 'three');
              });
         },
-        function parsey(callback){
+        function writeAttributesJSON(callback){
             // get links from casper links collection and scrape each profile then dump all contents
             console.log('step three!');
            p.parsey(function(){
