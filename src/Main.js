@@ -16,13 +16,12 @@ function d(callback) {
         callback();
         })
     }
-
-// import function to scrape profile
+// import function to get links
     var GetProfileLinks = require('./GetProfileLinks_FromDump.js');
-// all profile urls consist of this url
-    var baseURL = 'https://www.lendwithcare.org/';
 // calls function from getlinksfromdump module that parses JSON object and returns array of profile links
     var linksArr = GetProfileLinks.getProfileLinks;
+// all profile urls consist of this url
+    var baseURL = 'https://www.lendwithcare.org/';
 // t termporarily stoes data for each scrape to dump to file
     var t = [];
 
@@ -55,19 +54,23 @@ async.series([
             console.log('step one!');
             d(function(){
                 console.log('ok done - now  run alis');
-                callback(null, 'two');});
+                callback(null, 'two');
+            });
         },
         function alis(callback){
             // split files from dumped contents to individual projs and write to individualprojectsRaw.json
             console.log('step two! - alis run');
-            split.split ( callback(null , 'two'));
+            split.split ( function() {
+                console.log('calling final step');
+                callback(null, 'three');
+             });
         },
         function parsey(callback){
             // get links from casper links collection and scrape each profile then dump all contents
             console.log('step three!');
            p.parsey(function(){
-                console.log('ok final parse and write done');
-                callback(null, 'two');});
+                console.log('ok final parse done');
+                callback(null, 'four');});
         }
     ],
 // optional callback
