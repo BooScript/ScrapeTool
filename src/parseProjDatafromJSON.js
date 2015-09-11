@@ -66,5 +66,5 @@ function finalParse(callback) {
         projects.push((projectAttr));
     }
     console.log(projects);
-    writeToJSONFile(projects);
+    writeToJSONFile(projects, callback);
 }
