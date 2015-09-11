@@ -8,23 +8,21 @@ var p = require('./parseProjDatafromJSON');
 var split = require('./SplitTxtEachProj.js');
 var request = require("request");
 
-function d(callback) {
-    function writeToFile(data) {
-        fs.writeFile('rawProfileContent2.txt', data, function () {
-            console.log('file written!!!!!!!!');
-            //split.split();
-            callback();
-        })
-    }
+// array is temporary hold for profile dumps
+var t = [];
+// all profile urls consist of this url
+var baseURL = 'https://www.lendwithcare.org/';
+function getProfileLinks(callback) {
 
 // import function to get links
     var GetProfileLinks = require('./GetProfileLinks_FromDump.js');
 // calls function from getlinksfromdump module that parses JSON object and returns array of profile links
     var linksArr = GetProfileLinks.getProfileLinks;
-// all profile urls consist of this url
-    var baseURL = 'https://www.lendwithcare.org/';
-// t termporarily stoes data for each scrape to dump to file
-    var t = [];
+
+callback(null, linksArr);
+}
+
+
 
 
     /*
@@ -52,6 +50,7 @@ function d(callback) {
      }
      */
 
+function ProfileScrapes(linksArr, callback){
     async.forEach((linksArr), function (url, callback) { //The second argument (callback) is the continues the control flow
         var urlCur = baseURL + url;
         console.log(urlCur);
@@ -68,20 +67,45 @@ function d(callback) {
     });
     callback();
 }
+
+function writeToFile(data) {
+    fs.writeFile('rawProfileContent2.txt', data, function () {
+        console.log('file written!!!!!!!!');
+        //split.split();
+        callback();
+    })
+}
+
     async.series([
-        function tom(callback){
-            // get links from casper links collection and scrape each profile then dump all contents
+            function getMyLinks(callback){
+                // get links from casper links collection and scrape each profile then dump all contents
+                console.log('step one!');
+                getProfileLinks(function(){
+                    console.log('ok got links - ');
+                    callback(null, 'two3');
+                });
+            },
+            function scrapeEach(linksArr, callback){
+                //scrape each profile
+                console.log('step one!');
+                getProfileLinks(function(){
+                    console.log('each profile has been scraped......');
+                    callback(null, '2two');
+                });
+            },
+        function writeDump(callback){
+            // write dump to rawcontent2 file
             console.log('step one!');
-            d(function(){
-                console.log('ok done - now  run alis');
-                callback(null, 'two');
+            writeToFile(function(){
+                console.log('ok done -written to file');
+                callback(null, 'tw3o');
             });
         },
         function alis(callback){
             // split files from dumped contents to individual projs and write to individualprojectsRaw.json
             console.log('step two! - alis run');
             split.split ( function() {
-                console.log('calling final step');
+                console.log('ok done split of files to indididualprojs.json ');
                 callback(null, 'three');
             });
         },
@@ -96,4 +120,5 @@ function d(callback) {
 // optional callback
     function(err, results){
         // results is now equal to ['one', 'two']
+        console.log(err);
     });
