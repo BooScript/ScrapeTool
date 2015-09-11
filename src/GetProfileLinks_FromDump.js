@@ -19,10 +19,9 @@ function getProfileLinks() {
     });
     //filter for unique links (delete duplicates)
     var uniqueProfileLinks = profilelinks.filter( onlyUnique ); // returns ['a', 1, 2, '1']
-console.log(uniqueProfileLinks);
+    console.log(uniqueProfileLinks);
     return uniqueProfileLinks;
 }
 
 //console.log(getProfileLinks());
-
 
