@@ -13,7 +13,7 @@ function d(callback) {
         fs.writeFile('rawProfileContent2.txt', data, function () {
             console.log('file written!!!!!!!!');
             //split.split();
-        callback();
+            callback();
         })
     }
 // import function to get links
@@ -25,27 +25,46 @@ function d(callback) {
 // t termporarily stoes data for each scrape to dump to file
     var t = [];
 
-//count responses received
-    var responseCount = 0;
+
 //scrape profiles
-    for (var i = 0; i < 40; i++) {
-        //concatenate base url with profile link url to give request url
-        var urlCur = baseURL + linksArr[i];
+var limit = 10;
+    var counter=0;
+    async.eachLimit((linksArr), limit, function (url, index) { //The second argument (callback) is the continues the control flow
+            var urlCur = baseURL + url;
+            console.log(urlCur);
 
-        request(urlCur, function (error, response, body) {
-            t.push(body);
-            // increment response counter to keep track of responses received
-            if (response) {
-                responseCount++
-            }
-            // this should be set to (last loop value -1) to ensure file is written after
-            // all responses have been received
-            if (responseCount === 39) {
-                writeToFile(t, callback);
+            request(urlCur, function (error, response, body) {
+                    if(error){
 
-            }
+                        console.log(error + urlCur );
+
+                        return;
+                    }
+                    if(response) {
+                        t.push(body);
+                        console.log(url);
+                        counter++; 
+                        if(counter ==limit){
+                            writeToFile(t, callback);
+                        }
+                    }
+        },
+
+        function(err){
+          // if any of the file processing produced an error, err would equal that error
+            if( err ) {
+                // One of the iterations produced an error.
+                // All processing will now stop.
+             console.log('A request for a profile failed tokl,; process');
+            } else {
+                console.log('requests for all profiles have been processed successfully');
+
+        }
+
+
         });
-    }
+    });
+
 
 }
 async.series([
@@ -63,12 +82,12 @@ async.series([
             split.split ( function() {
                 console.log('calling final step');
                 callback(null, 'three');
-             });
+            });
         },
         function writeAttributesJSON(callback){
             // get links from casper links collection and scrape each profile then dump all contents
             console.log('step three!');
-           p.parsey(function(){
+            p.parsey(function(){
                 console.log('ok final parse done');
                 callback(null, 'four');});
         }
@@ -77,4 +96,3 @@ async.series([
     function(err, results){
         // results is now equal to ['one', 'two']
     });
-
