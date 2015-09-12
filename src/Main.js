@@ -13,7 +13,7 @@ function d(callback) {
         fs.writeFile('rawProfileContent2.txt', data, function () {
             console.log('file written!!!!!!!!');
             //split.split();
-        callback();
+            callback();
         })
     }
 // import function to get links
@@ -28,19 +28,22 @@ function d(callback) {
 //count responses received
     var responseCount = 0;
 //scrape profiles
-    for (var i = 0; i < 40; i++) {
+    for (var i = 0; i < linksArr.length-1; i++) {
         //concatenate base url with profile link url to give request url
         var urlCur = baseURL + linksArr[i];
-
+        console.log(i);
         request(urlCur, function (error, response, body) {
+            if(error)console.log(error + urlCur);
+
             t.push(body);
             // increment response counter to keep track of responses received
             if (response) {
-                responseCount++
+                responseCount++;
+
             }
             // this should be set to (last loop value -1) to ensure file is written after
             // all responses have been received
-            if (responseCount === 39) {
+            if (responseCount === linksArr.length-1) {
                 writeToFile(t, callback);
 
             }
@@ -63,12 +66,12 @@ async.series([
             split.split ( function() {
                 console.log('calling final step');
                 callback(null, 'three');
-             });
+            });
         },
         function writeAttributesJSON(callback){
             // get links from casper links collection and scrape each profile then dump all contents
             console.log('step three!');
-           p.parsey(function(){
+            p.parsey(function(){
                 console.log('ok final parse done');
                 callback(null, 'four');});
         }
@@ -77,4 +80,3 @@ async.series([
     function(err, results){
         // results is now equal to ['one', 'two']
     });
-
