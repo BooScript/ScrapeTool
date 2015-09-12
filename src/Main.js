@@ -22,31 +22,42 @@ var baseURL = 'https://www.lendwithcare.org/';
 
 // t termporarily stoes data for each scrape to dump to file
 var t = [];
+
+
+var requestCounter=0;
+var responseCounter=0;
 function scrapeProfiles(callback) {
-    var limit = 4;
-    var counter=0;
-    async.eachLimit((linksArr), limit, function (url, index) { //The second argument (callback) is the continues the control flow
+
+    // while loops until each batch of requests is done
+    while(requestCounter<4) {
+        var limit = 4;
+        async.eachLimit((linksArr), limit, function (url, index) { //The second argument (callback) is the continues the control flow
             var urlCur = baseURL + url;
+            console.log(requestCounter + ' ' + urlCur);             
+            requestCounter++;
             request(urlCur, function (error, response, body) {
-                    if(error){
-                        console.log(error + ' ' +urlCur);
+
+                    if (error) {
+                        console.log(error + ' ' + urlCur);
                         return;
                     }
-                    if(response) {
+                    if (response) {
                         t.push(body);
                         console.log(url);
-                        counter++;
-                        if(counter ==limit){
-                            writeToFile(t, callback);
+                        responseCounter++;
+                        if (responseCounter == requestCounter) {
+                                 writeToFile(t, callback);
                         }
                     }
-            },
-            function(error){
-                if( err ) {
-                console.log(error);
-                }
-            });
-    });
+                },
+                function (error) {
+                    if (err) {
+                        console.log(error);
+                    }
+                });
+        });
+     //  requestCounter++
+    }
 }
 
 async.series([
