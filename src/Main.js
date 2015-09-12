@@ -8,87 +8,69 @@ var p = require('./parseProjDatafromJSON');
 var split = require('./SplitTxtEachProj.js');
 var request = require("request");
 
-function d(callback) {
-    function writeToFile(data) {
-        fs.writeFile('rawProfileContent2.txt', data, function () {
-            console.log('file written!!!!!!!!');
-            //split.split();
-            callback();
-        })
-    }
+function writeToFile(data, callback) {
+    fs.writeFile('rawProfileContent2.txt', data, function () {
+        console.log('scraped profiles dump written to file');
+        callback();
+    })
+}
 // import function to get links
-    var GetProfileLinks = require('./GetProfileLinks_FromDump.js');
+var GetProfileLinks = require('./GetProfileLinks_FromDump.js');
 // calls function from getlinksfromdump module that parses JSON object and returns array of profile links
-    var linksArr = GetProfileLinks.getProfileLinks;
+var linksArr = GetProfileLinks.getProfileLinks;
 // all profile urls consist of this url
-    var baseURL = 'https://www.lendwithcare.org/';
+var baseURL = 'https://www.lendwithcare.org/';
 // t termporarily stoes data for each scrape to dump to file
-    var t = [];
+var t = [];
 
-
-//scrape profiles
-var limit = 10;
+function scrapeProfiles(callback) {
+    var limit = 4;
     var counter=0;
     async.eachLimit((linksArr), limit, function (url, index) { //The second argument (callback) is the continues the control flow
             var urlCur = baseURL + url;
-            console.log(urlCur);
-
             request(urlCur, function (error, response, body) {
                     if(error){
-
-                        console.log(error + urlCur );
-
+                        console.log(error + ' ' +urlCur);
                         return;
                     }
                     if(response) {
                         t.push(body);
                         console.log(url);
-                        counter++; 
+                        counter++;
                         if(counter ==limit){
                             writeToFile(t, callback);
                         }
                     }
-        },
-
-        function(err){
-          // if any of the file processing produced an error, err would equal that error
-            if( err ) {
-                // One of the iterations produced an error.
-                // All processing will now stop.
-             console.log('A request for a profile failed tokl,; process');
-            } else {
-                console.log('requests for all profiles have been processed successfully');
-
-        }
-
-
-        });
+            },
+            function(error){
+                if( err ) {
+                console.log(error);
+                }
+            });
     });
-
-
 }
+
 async.series([
-        function tom(callback){
-            // get links from casper links collection and scrape each profile then dump all contents
-            console.log('step one!');
-            d(function(){
-                console.log('ok done - now  run alis');
+        function Write_Scraped_Profiles_Dump_To_File(callback){
+            console.log('scrapping..');
+            scrapeProfiles(function(){
+                console.log('ok done');
                 callback(null, 'two');
             });
         },
-        function alis(callback){
+        function Split_Scraped_Profiles_To_JSON(callback){
             // split files from dumped contents to individual projs and write to individualprojectsRaw.json
-            console.log('step two! - alis run');
+            console.log('splitting...');
             split.split ( function() {
-                console.log('calling final step');
+                console.log('ok done');
                 callback(null, 'three');
             });
         },
-        function writeAttributesJSON(callback){
+        function Regex_Gets_Attributes_ForEach_Project_Then_Writes_ToFile(callback){
             // get links from casper links collection and scrape each profile then dump all contents
-            console.log('step three!');
+            console.log('parsing...');
             p.parsey(function(){
-                console.log('ok final parse done');
+                console.log('ok done');
                 callback(null, 'four');});
         }
     ],
