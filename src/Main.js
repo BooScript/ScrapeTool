@@ -1,80 +1,82 @@
 //Gets links and writes dump of profile data to file
 //
-// import modules.
 var async = require("async");
 var fs = require('fs');
-require('./ProjectClass.js');
 var p = require('./parseProjDatafromJSON');
 var split = require('./SplitTxtEachProj.js');
 var request = require("request");
 
-function d(callback) {
-    function writeToFile(data) {
-        fs.writeFile('rawProfileContent2.txt', data, function () {
-            console.log('file written!!!!!!!!');
-            //split.split();
+function writeToFile(data, callback) {
+    fs.writeFile('rawProfileContent2.txt', data, function () {
+        console.log('file written - ' + 'rawProfileContent2.txt');
         callback();
-        })
-    }
-// import function to get links
-    var GetProfileLinks = require('./GetProfileLinks_FromDump.js');
-// calls function from getlinksfromdump module that parses JSON object and returns array of profile links
-    var linksArr = GetProfileLinks.getProfileLinks;
-// all profile urls consist of this url
-    var baseURL = 'https://www.lendwithcare.org/';
-// t termporarily stoes data for each scrape to dump to file
-    var t = [];
-
-//count responses received
-    var responseCount = 0;
-//scrape profiles
-    for (var i = 0; i < 40; i++) {
-        //concatenate base url with profile link url to give request url
-        var urlCur = baseURL + linksArr[i];
-
-        request(urlCur, function (error, response, body) {
-            t.push(body);
-            // increment response counter to keep track of responses received
-            if (response) {
-                responseCount++
-            }
-            // this should be set to (last loop value -1) to ensure file is written after
-            // all responses have been received
-            if (responseCount === 39) {
-                writeToFile(t, callback);
-
-            }
-        });
-    }
-
+    })
 }
+
+// import function to get links
+var GetProfileLinks = require('./GetProfileLinks_FromDump.js');
+// calls function from getlinksfromdump module that parses JSON object and returns array of profile links
+var linksArr = GetProfileLinks.getProfileLinks;
+// all profile urls consist of this url
+var baseURL = 'https://www.lendwithcare.org/';
+
+// t termporarily stoes data for each scrape to dump to file
+var t = [];
+function scrapeProfiles(callback) {
+    var limit = 4;
+    var counter=0;
+    async.eachLimit((linksArr), limit, function (url, index) { //The second argument (callback) is the continues the control flow
+            var urlCur = baseURL + url;
+            request(urlCur, function (error, response, body) {
+                    if(error){
+                        console.log(error + ' ' +urlCur);
+                        return;
+                    }
+                    if(response) {
+                        t.push(body);
+                        console.log(url);
+                        counter++;
+                        if(counter ==limit){
+                            writeToFile(t, callback);
+                        }
+                    }
+            },
+            function(error){
+                if( err ) {
+                console.log(error);
+                }
+            });
+    });
+}
+
 async.series([
-        function tom(callback){
-            // get links from casper links collection and scrape each profile then dump all contents
-            console.log('step one!');
-            d(function(){
-                console.log('ok done - now  run alis');
+        function Write_Scraped_Profiles_Dump_To_File(callback){
+            console.log('scrapping..');
+            scrapeProfiles(function(){
+                console.log('ok done.');
                 callback(null, 'two');
             });
         },
-        function alis(callback){
+        function Split_Scraped_Profiles_To_JSON(callback){
             // split files from dumped contents to individual projs and write to individualprojectsRaw.json
-            console.log('step two! - alis run');
+            console.log('splitting...');
             split.split ( function() {
-                console.log('calling final step');
+                console.log('ok done.');
                 callback(null, 'three');
-             });
+            });
         },
-        function writeAttributesJSON(callback){
+        function Regex_Gets_Attributes_ForEach_Project_Then_Writes_ToFile(callback){
             // get links from casper links collection and scrape each profile then dump all contents
-            console.log('step three!');
-           p.parsey(function(){
-                console.log('ok final parse done');
+            console.log('parsing...');
+            p.parsey(function(){
+                console.log('ok done.');
                 callback(null, 'four');});
         }
     ],
 // optional callback
     function(err, results){
-        // results is now equal to ['one', 'two']
+        // results is now equal to
+        if(err){
+            console.log(err);
+        }
     });
-
