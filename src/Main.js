@@ -6,6 +6,7 @@ var p = require('./parseProjDatafromJSON');
 var split = require('./SplitTxtEachProj.js');
 var request = require("request");
 
+
 function writeToFile(data, callback) {
     fs.writeFile('rawProfileContent2.txt', data, function () {
         console.log('file written - ' + 'rawProfileContent2.txt');
@@ -23,19 +24,23 @@ var baseURL = 'https://www.lendwithcare.org/';
 // t termporarily stoes data for each scrape to dump to file
 var t = [];
 
+function tom(a){return 1+a;}
 
+function helloworld(){return 'hello world'}
 var requestCounter=0;
 var responseCounter=0;
 function scrapeProfiles(callback) {
 
     // while loops until each batch of requests is done
-    while(requestCounter<4) {
-        var limit = 4;
+    while(requestCounter<linksArr.length) { // loops for all links - THIS WILL TIMEOUT - make into queue
+        var limit = 4; // how many request to make at once
         async.eachLimit((linksArr), limit, function (url, index) { //The second argument (callback) is the continues the control flow
             var urlCur = baseURL + url;
-            console.log(requestCounter + ' ' + urlCur);             
+            console.log(requestCounter + ' ' + urlCur);
             requestCounter++;
             request(urlCur, function (error, response, body) {
+                            tom(1);
+                            //test
 
                     if (error) {
                         console.log(error + ' ' + urlCur);
@@ -51,16 +56,19 @@ function scrapeProfiles(callback) {
                     }
                 },
                 function (error) {
-                    if (err) {
+                    if (error) {
                         console.log(error);
                     }
                 });
         });
      //  requestCounter++
     }
+    //return the array containing the data dump from scrapes on profiles
+    return t;
 }
 
 async.series([
+
         function Write_Scraped_Profiles_Dump_To_File(callback){
             console.log('scrapping..');
             scrapeProfiles(function(){
