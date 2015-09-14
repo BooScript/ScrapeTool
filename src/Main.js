@@ -5,6 +5,7 @@ var fs = require('fs');
 var p = require('./parseProjDatafromJSON');
 var split = require('./SplitTxtEachProj.js');
 var request = require("request");
+var _ = require("lodash");
 
 
 function writeToFile(data, callback) {
@@ -21,12 +22,10 @@ var linksArr = GetProfileLinks.getProfileLinks;
 // all profile urls consist of this url
 var baseURL = 'https://www.lendwithcare.org/';
 
-// t termporarily stoes data for each scrape to dump to file
+// t termporarily stores data for each scrape to dump to file
 var t = [];
 
-function tom(a){return 1+a;}
 
-function helloworld(){return 'hello world'}
 var requestCounter=0;
 var responseCounter=0;
 function scrapeProfiles(callback) {
@@ -34,47 +33,106 @@ function scrapeProfiles(callback) {
     // while loops until each batch of requests is done
     while(requestCounter<linksArr.length) { // loops for all links - THIS WILL TIMEOUT - make into queue
         var limit = 4; // how many request to make at once
-        async.eachLimit((linksArr), limit, function (url, index) { //The second argument (callback) is the continues the control flow
-            var urlCur = baseURL + url;
-            console.log(requestCounter + ' ' + urlCur);
-            requestCounter++;
-            request(urlCur, function (error, response, body) {
-                            tom(1);
-                            //test
 
-                    if (error) {
-                        console.log(error + ' ' + urlCur);
-                        return;
-                    }
-                    if (response) {
-                        t.push(body);
-                        console.log(url);
-                        responseCounter++;
-                        if (responseCounter == requestCounter) {
-                                 writeToFile(t, callback);
-                        }
-                    }
-                },
-                function (error) {
-                    if (error) {
-                        console.log(error);
-                    }
-                });
-        });
      //  requestCounter++
     }
     //return the array containing the data dump from scrapes on profiles
     return t;
 }
+/*
+function ScrapeTask(){
+    async.eachLimit((linksArr), limit, function (url, index) { //The second argument (callback) is the continues the control flow
+        var urlCur = baseURL + url;
+        console.log(requestCounter + ' ' + urlCur);
+        requestCounter++;
+        request(urlCur, function (error, response, body) {
+
+                if (error) {
+                    console.log(error + ' ' + urlCur);
+                    return;
+                }
+                if (response) {
+                    t.push(body);
+                    console.log(url);
+                    responseCounter++;
+                    if (responseCounter == requestCounter) {
+                        writeToFile(t, callback);
+                    }
+                }
+            },
+            function (error) {
+                if (error) {
+                    console.log(error);
+                }
+            });
+    });
+}
+*/
+
+function QueueRequests(callback1) {
+    console.log("setting queue workers to action");
+
+
+
+    var concurrency = 40; // number of request to run in parallel
+    var tasksList = linksArr;
+
+
+    var q = async.queue(function (task, callback) {
+        console.log('performing task ' + task.name);
+        var urlCur = baseURL + task.name;
+        request(urlCur, function (error, response, body) {
+
+                if (error) {
+                    console.log(error + ' ' + urlCur);
+                    return;
+                }
+                if (response) {
+                    t.push(body);
+                    console.log(urlCur);
+                    responseCounter++;
+                   callback();
+                }
+            },
+            function (error) {
+                if (error) {
+                    console.log(error);
+                }
+                console.log('done');
+            });
+
+    }, concurrency);
+
+
+    q.drain = function () {
+        //pass call back to resume next step in async series after file is written
+        writeToFile(t, callback1);
+    };
+
+    tasksList.forEach( function(task){
+        q.push({name: task}, function(err){
+            //done
+            if(err){
+                console.log(err);
+            }
+        })
+    })
+
+}
+
+
 
 async.series([
 
         function Write_Scraped_Profiles_Dump_To_File(callback){
-            console.log('scrapping..');
-            scrapeProfiles(function(){
+            console.log('scrapping..' + 'for completed funding projects');
+
+
+            QueueRequests(function(callback1){
                 console.log('ok done.');
                 callback(null, 'two');
             });
+
         },
         function Split_Scraped_Profiles_To_JSON(callback){
             // split files from dumped contents to individual projs and write to individualprojectsRaw.json
