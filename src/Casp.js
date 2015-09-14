@@ -1,11 +1,13 @@
 /**
  * Created by Tom on 04/09/2015.
+ * Gets links dump containing profile links for a given category of project ('needs funding','fully funded','completed')
  */
+
+    // https://www.lendwithcare.org/search/funded/completed
+
 var links = [];
 var casper = require('casper').create();
 var fs = require('fs');
-
-
 
 function getProfileLinks() {
     var links = document.querySelectorAll('a');
@@ -14,16 +16,22 @@ function getProfileLinks() {
     });
 }
 
-casper.start('https://www.lendwithcare.org/search/completed/funded', function() {
+var url = casper.cli.get(0);
+
+casper.start(url, function() {
+    this.echo(url);
+
 
 });
 
 casper.then(function(){
     //store css selector for  button that loads more content
     var buttonCss = '#card_container > div.paginate-more > button';
+    //count timeouts
+    var timeoutCount=0;
 
-    for(var i=0; i<1; i++) {
-
+    //limit paginations to 500
+    for(var i=0; i<500; i++) {
         // when button appears echo
         casper.waitForSelector(buttonCss,
 
@@ -32,31 +40,30 @@ casper.then(function(){
                 this.click('#card_container > div.paginate-more > button');
             },
 
-            function onTimeout(){this.echo('timed out before button element loaded in DOM')}, 15000
+            function onTimeout(){
+                this.echo('timed out before button element loaded in DOM');
+                timeoutCount++;
+                this.echo('timeout count is ' + timeoutCount);
+                if(timeoutCount===2) {       // set to two to allow for one request timeoutas a buffer
+                request.abort(); // proceed to next step (no more paginations possible)
+                }
+            }
+            , 15000 //set timeout limit
         );
-    }this.capture('goog');
+
+    }
 });
 
 casper.then(function() {
 
-    // aggregate links from page
-    links = this.evaluate(getProfileLinks);
-
-    // write all links to JSON file
-    fs.write('linksData.json', JSON.stringify(links), 'w');
-
-
-});
-
-casper.then(function() {
-
-    //this.capture('google.png');
+   //this.capture('google.png');
     links = links.concat(this.evaluate(getProfileLinks));
+    fs.write('linksData2.json', JSON.stringify(links), 'w');
 });
 
 casper.run(function() {
     // echo results in some pretty fashion
     this.echo(links.length + ' links found:');
     this.echo(' - ' + links.join('\n - ')).exit();
-
 });
+
