@@ -1,4 +1,4 @@
-# ScrapeTool
+# ScrapeTool - Project Write-Up
 
 Whilst working for a data analytics start up on a voluntary basis I created a bot that scraped the website lendwithcare.org. 
 
